@@ -1,5 +1,6 @@
 package jp.techacademy.tanaka.yousuke.qa_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,9 +10,20 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
+    /**
+     * MainActivityからログイン画面を呼び出すように修正します。
+     * onCreateメソッドの中で記述されているFloatingActionButtonのOnClickListenerの中でLoginActivityに遷移するように実装します。
+     * QA_Appの仕様として、質問や回答を投稿する際にログインしていなければログイン画面を表示するようにしたいので、
+     * まずはログインしているかどうかを確認します。
+     * FirebaseクラスのgetAuthメソッドで認証情報であるAuthDataクラスのインスタンスを取得することができます。
+     * この戻り値がnullである場合はログインしていないことになるのでその場合にログイン画面に遷移するように実装します。
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -22,8 +34,14 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // ログイン済みのユーザーを収録する
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                // ログインしていなければログイン画面に遷移させる
+                if (user == null) {
+                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(intent);
+                }
             }
         });
     }
