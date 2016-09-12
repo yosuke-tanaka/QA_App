@@ -45,11 +45,30 @@ public class LoginActivity extends AppCompatActivity {
     boolean mIsCreateAccount = false;
 
     @Override
+    /**
+     * 以下の処理を実行
+     * ・データベースへのリファレンスを取得
+     * ・FirebaseAuthクラスのインスタンスを取得
+     * ・アカウント作成処理のリスナーを作成
+     * ・ログイン処理処理のリスナーを作成
+     * ・タイトルバーのタイトルを変更
+     * ・UIをメンバ変数に保持
+     * ・アカウント作成ボタンとログインボタンのOnClickListenerを設定
+     *
+     *
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         mDataBaseReference = FirebaseDatabase.getInstance().getReference();
+
+        // ----------------------------------------------------
+        // Firebaseのアカウント作成処理はOnCompleteListenerクラスで受け取ります。
+        // このクラスはonCompleteメソッドをオーバーライドする必要があります。
+        // その中で引数で渡ってきたTaskクラスのisSuccessfulメソッドで成功したかどうかを確認します。
+        // アカウント作成が成功した際にはそのままログイン処理を行うため、loginメソッドを呼び出します。
+        // アカウント作成に失敗した場合は、Snackbarでエラーの旨を表示し、処理中に表示していたダイアログを非表示にします。
 
         // FirebaseAuthのオブジェクトを取得する
         mAuth = FirebaseAuth.getInstance();
@@ -76,6 +95,20 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         };
+
+
+        // ----------------------------------------------------
+        // Firebaseのログイン処理もOnCompleteListenerクラスで受け取ります。
+        // ログインに成功したときはmIsCreateAccountを使ってアカウント作成ボタンを押してからのログイン処理か、
+        // ログインボタンをタップの場合かで処理を分けます。
+        //
+        // アカウント作成ボタンを押した場合は表示名をFirebaseとPreferenceに保存します。
+        //
+        // ログインボタンをタップしたときは、Firebaseから表示名を取得してPreferenceに保存します。
+        //
+        // Firebaseからデータを一度だけ取得する場合は
+        // DatabaseReferenceクラスが実装しているQueryクラスのaddListenerForSingleValueEventメソッドを使います。
+        // ログインに失敗した場合は、Snackbarでエラーの旨を表示し、処理中に表示していたダイアログを非表示にします。
 
         // ログイン処理のリスナー
         mLoginListener = new OnCompleteListener<AuthResult>() {
@@ -128,6 +161,16 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         };
+
+
+
+
+        // ----------------------------------------------------
+        // UI関連はタイトルの設定と、各UIのインスタンスをメンバ変数に保持、及びボタンのOnClickListnerの設定です。
+        // アカウント作成ボタンをタップした時には、キーボードを閉じ、ログイン時に表示名を保存するようにmIsCreateAccountにtrueを設定します。
+        // そしてcreateAccountメソッドを呼び出してアカウント作成処理を開始させます。
+        // ログインボタンのタップした時にはキーボードを閉じ、loginメソッドを呼び出してログイン処理を開始させます。
+
 
         // UIの準備
         setTitle("ログイン");
@@ -187,6 +230,13 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * アカウント作成を行うcreateAccountメソッドではProgressDialogクラスのshowメソッドを呼び出してダイアログを表示させ、
+     * FirebaseAuthクラスのcreateUserWithEmailAndPasswordメソッドでアカウント作成を行います。
+     * createUserWithEmailAndPasswordメソッドの引数にはメールアドレス、パスワードを与え、さらにaddOnCompleteListenerメソッドを呼び出してリスナーを設定します。
+     * @param email
+     * @param password
+     */
     private void createAccount(String email, String password) {
         // プログレスダイアログを表示する
         mProgress.show();
@@ -195,6 +245,13 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(mCreateAccountListener);
     }
 
+    /**
+     * ログイン処理を行うloginメソッドではProgressDialogクラスのshowメソッドを呼び出してダイアログを表示させ、
+     * FirebaseAuthクラスのsignInWithEmailAndPasswordメソッドでログイン処理を行います。
+     * signInWithEmailAndPasswordメソッドの引数にはメールアドレス、パスワードを与え、さらにaddOnCompleteListenerメソッドを呼び出してリスナーを設定します。
+     * @param email
+     * @param password
+     */
     private void login(String email, String password) {
         // プログレスダイアログを表示する
         mProgress.show();
@@ -203,6 +260,11 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(mLoginListener);
     }
 
+    /**
+     * saveNameメソッドでは引数で受け取った表示名をPreferenceに保存します。
+     * 忘れずにcommitメソッドを呼び出して保存処理を反映させます。
+     * @param name
+     */
     private void saveName(String name) {
         // Preferenceに保存する
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
