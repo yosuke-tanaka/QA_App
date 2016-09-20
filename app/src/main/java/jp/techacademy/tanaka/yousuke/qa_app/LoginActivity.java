@@ -87,8 +87,13 @@ public class LoginActivity extends AppCompatActivity {
 
                     // 失敗した場合
                     // エラーを表示する
+                    String errMsg = "アカウント作成に失敗しました";
+                    if(task.getException() != null) {
+                        errMsg = task.getException().getMessage();
+                    }
+
                     View view = findViewById(android.R.id.content);
-                    Snackbar.make(view, "アカウント作成に失敗しました", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(view, errMsg, Snackbar.LENGTH_LONG).show();
 
                     // プログレスダイアログを非表示にする
                     mProgress.dismiss();
