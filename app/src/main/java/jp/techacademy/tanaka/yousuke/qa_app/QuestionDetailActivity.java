@@ -25,6 +25,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     private DatabaseReference mAnswerRef;
 
+    // お気に入りボタンの押下状態
+    private boolean m_isFaboriteOn = false;
+
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -110,6 +113,24 @@ public class QuestionDetailActivity extends AppCompatActivity {
                     Intent intent = new Intent(getApplicationContext(), AnswerSendActivity.class);
                     intent.putExtra("question", mQuestion);
                     startActivity(intent);
+                }
+            }
+        });
+
+        // 2016.09.20 [修正] お気に入り追加
+        // [注意] お気に入りボタンはログイン済みの場合のみ表示される
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab_favorite);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(m_isFaboriteOn == true){
+                    TODO:
+                    m_isFaboriteOn = false;
+                }
+                else
+                {
+                    TODO:
+                    m_isFaboriteOn = true;
                 }
             }
         });

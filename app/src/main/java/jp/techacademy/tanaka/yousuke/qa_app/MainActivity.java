@@ -194,7 +194,11 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
-                if (id == R.id.nav_hobby) {
+                // 2016.09.20 [修正] お気に入り追加
+                if (id == R.id.nav_favorite) {
+                    mToolbar.setTitle("お気に入り");
+                    mGenre = 0;
+                } else if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
                     mGenre = 1;
                 } else if (id == R.id.nav_life) {
