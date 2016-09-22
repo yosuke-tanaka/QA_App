@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             String name = (String) map.get("name");
             String uid = (String) map.get("uid");
             String imageString = (String) map.get("image");
+            String isFavoriteStr = (String) map.get("isFavorite");
             Bitmap image = null;
             byte[] bytes;
             if (imageString != null) {
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList);
+            Question question = new Question(title, body, name, uid, dataSnapshot.getKey(), mGenre, bytes, answerArrayList, isFavoriteStr);
             mQuestionArrayList.add(question);
             mAdapter.notifyDataSetChanged();
         }
@@ -99,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
          * onChildChangedメソッドは要素に変化があった時です。
          * 今回は質問に対して回答が投稿された時に呼ばれることとなります。
          * このメソッドが呼ばれたら変化があった質問に対応するQuestionクラスのインスタンスが保持している回答のArrayListを一旦クリアし、取得した回答を設定します。
+         *
+         * // このアプリで変更がある可能性があるのは：
+         * 　・回答(Answer)
+         *   ・お気に入り状態
          */
         public void onChildChanged(DataSnapshot dataSnapshot, String s) {
             HashMap map = (HashMap) dataSnapshot.getValue();
@@ -106,7 +111,16 @@ public class MainActivity extends AppCompatActivity {
             // 変更があったQuestionを探す
             for (Question question: mQuestionArrayList) {
                 if (dataSnapshot.getKey().equals(question.getQuestionUid())) {
-                    // このアプリで変更がある可能性があるのは回答(Answer)のみ
+                    // 2016.09.20 [修正] お気に入り追加
+                    String isFavorite;
+                    if(map.get("isFavorite") == null) {
+                        isFavorite = "0";
+                    }
+                    else {
+                        isFavorite = (String) map.get("isFavorite");
+                    }
+                    question.setIsFavorite_byStr(isFavorite);
+
                     question.getAnswers().clear();
                     HashMap answerMap = (HashMap) map.get("answers");
                     if (answerMap != null) {

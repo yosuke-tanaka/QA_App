@@ -1,6 +1,8 @@
 package jp.techacademy.tanaka.yousuke.qa_app;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,16 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+
+    // plusボタン
+    private FloatingActionButton mFab;
+
+    // お気に入りボタン
+    private FloatingActionButton mFab2;
+
+    // お気に入りボタンの色
+    int mColorOn = 0xf2d727;     //On色
+    int mColorOff = 0xc6c5c2;    //Off色
 
     // お気に入りボタンの押下状態
     private boolean m_isFaboriteOn = false;
@@ -96,8 +108,13 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        // 2016.09.20 [修正] お気に入り追加
+        // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
+        m_isFaboriteOn = mQuestion.getIsFavorite();
+        SetFavoriteButton(m_isFaboriteOn);
+
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // ログイン済みのユーザーを収録する
@@ -118,25 +135,42 @@ public class QuestionDetailActivity extends AppCompatActivity {
         });
 
         // 2016.09.20 [修正] お気に入り追加
-        // [注意] お気に入りボタンはログイン済みの場合のみ表示される
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab_favorite);
-        fab2.setOnClickListener(new View.OnClickListener() {
+        mFab2 = (FloatingActionButton) findViewById(R.id.fab_favorite);
+        mFab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(m_isFaboriteOn == true){
-                    TODO:
-                    m_isFaboriteOn = false;
-                }
-                else
-                {
-                    TODO:
-                    m_isFaboriteOn = true;
-                }
+                SetFavoriteButton(m_isFaboriteOn);
             }
         });
+
+        // [注意] お気に入りボタンはログイン済みの場合のみ表示する
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user == null)
+        {
+            mFab2.hide();
+        }
 
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
     }
+
+    private void SetFavoriteButton(boolean isFaboriteOn)
+    {
+        if(isFaboriteOn == true){
+            TODO:
+            m_isFaboriteOn = false;
+            int color = Color.rgb(240,200,100);
+            mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
+        }
+        else
+        {
+            TODO:
+            m_isFaboriteOn = true;
+            int color = Color.rgb(200,200,200);
+            mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
+        }
+
+    }
+
 }
