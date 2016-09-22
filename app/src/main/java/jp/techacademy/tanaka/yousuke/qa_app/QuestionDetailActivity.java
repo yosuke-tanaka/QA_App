@@ -1,9 +1,11 @@
 package jp.techacademy.tanaka.yousuke.qa_app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -18,6 +20,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class QuestionDetailActivity extends AppCompatActivity {
 
@@ -32,10 +37,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     // お気に入りボタン
     private FloatingActionButton mFab2;
-
-    // お気に入りボタンの色
-    int mColorOn = 0xf2d727;     //On色
-    int mColorOff = 0xc6c5c2;    //Off色
 
     // お気に入りボタンの押下状態
     private boolean m_isFaboriteOn = false;
@@ -108,11 +109,6 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mListView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
 
-        // 2016.09.20 [修正] お気に入り追加
-        // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
-        m_isFaboriteOn = mQuestion.getIsFavorite();
-        SetFavoriteButton(m_isFaboriteOn);
-
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,34 +139,91 @@ public class QuestionDetailActivity extends AppCompatActivity {
             }
         });
 
-        // [注意] お気に入りボタンはログイン済みの場合のみ表示する
+        // お気に入りボタンはログイン済みの場合のみ表示する
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user == null)
         {
             mFab2.hide();
         }
 
+        // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
+        String qUid = mQuestion.getUid();
+        m_isFaboriteOn = getIsFavorite(qUid);
+        SetFavoriteButton(m_isFaboriteOn);
+
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
     }
 
+    /**
+     * お気に入り状態の切り替え
+     * @param isFaboriteOn
+     */
     private void SetFavoriteButton(boolean isFaboriteOn)
     {
         if(isFaboriteOn == true){
-            TODO:
             m_isFaboriteOn = false;
             int color = Color.rgb(240,200,100);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
         }
         else
         {
-            TODO:
             m_isFaboriteOn = true;
             int color = Color.rgb(200,200,200);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
         }
+    }
 
+    /**
+     * お気に入り質問かどうかの情報をPreferenceから取得
+     * @param questionUid
+     * @return
+     */
+    private boolean getIsFavorite(String questionUid)
+    {
+        boolean isFavorite;
+        String qUid;
+        Object obj;
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 読み込んでSetの末尾に追加
+        Set<String> uidSet = new HashSet<>();
+        sp.getStringSet(Const.FavoQUid, uidSet);
+        Iterator iterator = uidSet.iterator();
+        obj = iterator.next();
+
+        isFavorite =false;
+        while(obj != null){
+            qUid = (String)obj;
+            if(qUid == questionUid)
+            {
+                // お気に入り質問である
+                isFavorite = true;
+                break;
+            }
+        }
+
+        return isFavorite;
+    }
+
+    /**
+     * お気に入り質問をPrefernceに保存
+     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
+     * @param uid
+     */
+    private void saveFavoriteQuestionUid(String uid) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 読み込んでSetの末尾に追加
+        Set<String> uidSet = new HashSet<>();
+        sp.getStringSet(Const.FavoQUid, uidSet);
+        uidSet.add(uid);
+        // 保存
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putStringSet(Const.FavoQUid, uidSet);
+        editor.commit();
     }
 
 }

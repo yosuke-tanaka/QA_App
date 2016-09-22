@@ -6,4 +6,7 @@ public class Const {
     public static final String AnswersPATH = "answers"; // Firebaseに解答を保存するパス
 
     public static final String NameKEY = "name"; // Preferenceに表示名を保存する時のキー
+
+    // 2016.09.20 [修正] お気に入り追加
+    public static final String FavoQUid = "fquid"; // Preferenceにお気に入り質問のUIDを保存する時のキー
 }

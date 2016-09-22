@@ -227,8 +227,6 @@ public class QuestionSendActivity extends AppCompatActivity implements View.OnCl
             data.put("title", title);
             data.put("body", body);
             data.put("name", name);
-            // 2016.09.20 [修正] お気に入り追加
-            data.put("isFavorite", "0");
 
             // 添付画像を取得する
             BitmapDrawable drawable = (BitmapDrawable) mImageView.getDrawable();

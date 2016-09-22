@@ -63,25 +63,8 @@ public class Question implements Serializable {
         return mAnswerArrayList;
     }
 
-    /**
-     * 2016.09.20 [修正] お気に入り追加
-     * @return
-     */
-    public boolean getIsFavorite() {
-        return mIsFavorite;
-    }
-    public void setIsFavorite_byStr(String isFavorite) {
-        if(isFavorite == "0") {
-            mIsFavorite = false;
-        }
-        else
-        {
-            mIsFavorite = true;
-        }
-    }
-
     public Question(String title, String body, String name, String uid, String questionUid, int genre,
-                    byte[] bytes, ArrayList<Answer> answers, String isFavoriteStr) {
+                    byte[] bytes, ArrayList<Answer> answers) {
         mTitle = title;
         mBody = body;
         mName = name;
@@ -90,6 +73,5 @@ public class Question implements Serializable {
         mGenre = genre;
         mBitmapArray = bytes.clone();
         mAnswerArrayList = answers;
-        setIsFavorite_byStr(isFavoriteStr);
     }
 }
