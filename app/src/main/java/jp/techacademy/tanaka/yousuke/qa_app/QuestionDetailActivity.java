@@ -22,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 public class QuestionDetailActivity extends AppCompatActivity {
@@ -176,54 +177,91 @@ public class QuestionDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * お気に入り質問かどうかの情報をPreferenceから取得
+     * お気に入り質問かどうかの情報をFireBaseから取得
      * @param questionUid
      * @return
      */
     private boolean getIsFavorite(String questionUid)
     {
-        boolean isFavorite;
-        String qUid;
-        Object obj;
+        boolean isFavorite = true;
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        // 現在ログイン中のUserに対応するChildの参照を取得
+        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference fquidRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid);
 
-        // 読み込んでSetの末尾に追加
-        Set<String> uidSet = new HashSet<>();
-        sp.getStringSet(Const.FavoQUid, uidSet);
-        Iterator iterator = uidSet.iterator();
-        obj = iterator.next();
-
-        isFavorite =false;
-        while(obj != null){
-            qUid = (String)obj;
-            if(qUid == questionUid)
-            {
-                // お気に入り質問である
-                isFavorite = true;
-                break;
-            }
-        }
+        data = fquidRef.getKey();
 
         return isFavorite;
     }
 
-    /**
-     * お気に入り質問をPrefernceに保存
-     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
-     * @param uid
-     */
-    private void saveFavoriteQuestionUid(String uid) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//    /**
+//     * お気に入り質問かどうかの情報をPreferenceから取得
+//     * @param questionUid
+//     * @return
+//     */
+//    private boolean getIsFavorite(String questionUid)
+//    {
+//        boolean isFavorite;
+//        String qUid;
+//        Object obj;
+//
+//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//
+//        // 読み込んでSetの末尾に追加
+//        Set<String> uidSet = new HashSet<>();
+//        sp.getStringSet(Const.FavoQUid, uidSet);
+//        Iterator iterator = uidSet.iterator();
+//        obj = iterator.next();
+//
+//        isFavorite =false;
+//        while(obj != null){
+//            qUid = (String)obj;
+//            if(qUid == questionUid)
+//            {
+//                // お気に入り質問である
+//                isFavorite = true;
+//                break;
+//            }
+//        }
+//
+//        return isFavorite;
+//    }
 
-        // 読み込んでSetの末尾に追加
-        Set<String> uidSet = new HashSet<>();
-        sp.getStringSet(Const.FavoQUid, uidSet);
-        uidSet.add(uid);
-        // 保存
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putStringSet(Const.FavoQUid, uidSet);
-        editor.commit();
+    /**
+     //     * お気に入り質問をFireBaseに保存
+     //     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
+     //     * @param qUid
+     //     */
+    private void saveFavoriteQuestionUid(String qUid) {
+        // 現在ログイン中のUserに対応するChildの参照を取得
+        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference userRef = dataBaseReference.child(Const.UsersPATH).child(userUid);
+
+        Map<String, String> data = new HashMap<String, String>();
+        data.put(Const.FavoQUid, qUid);
+
+        userRef.push().setValue(data, this);
+        //mProgress.show();
     }
+
+//    /**
+//     * お気に入り質問をPrefernceに保存
+//     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
+//     * @param uid
+//     */
+//    private void saveFavoriteQuestionUid(String uid) {
+//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//
+//        // 読み込んでSetの末尾に追加
+//        Set<String> uidSet = new HashSet<>();
+//        sp.getStringSet(Const.FavoQUid, uidSet);
+//        uidSet.add(uid);
+//        // 保存
+//        SharedPreferences.Editor editor = sp.edit();
+//        editor.putStringSet(Const.FavoQUid, uidSet);
+//        editor.commit();
+//    }
 
 }
