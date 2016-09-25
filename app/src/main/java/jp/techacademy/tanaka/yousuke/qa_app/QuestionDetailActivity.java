@@ -29,6 +29,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     private ListView mListView;
     private Question mQuestion;
+    private String mOUID;    // 質問のUID
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
@@ -148,8 +149,8 @@ public class QuestionDetailActivity extends AppCompatActivity {
         }
 
         // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
-        String qUid = mQuestion.getUid();
-        m_isFaboriteOn = getIsFavorite(qUid);
+        mOUID = mQuestion.getQuestionUid();
+        m_isFaboriteOn = getIsFavorite(mOUID);
         SetFavoriteButton(m_isFaboriteOn);
 
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
@@ -164,15 +165,23 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private void SetFavoriteButton(boolean isFaboriteOn)
     {
         if(isFaboriteOn == true){
+            // お気に入り解除
             m_isFaboriteOn = false;
             int color = Color.rgb(240,200,100);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
+
+            // 解除
+            updateFavoriteQuestionUid(mOUID, false);
         }
         else
         {
+            // お気に入り化
             m_isFaboriteOn = true;
             int color = Color.rgb(200,200,200);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
+
+            // 登録
+            updateFavoriteQuestionUid(mOUID, true);
         }
     }
 
@@ -183,14 +192,25 @@ public class QuestionDetailActivity extends AppCompatActivity {
      */
     private boolean getIsFavorite(String questionUid)
     {
-        boolean isFavorite = true;
+        boolean isFavorite;
 
         // 現在ログイン中のUserに対応するChildの参照を取得
         String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference fquidRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid);
+        DatabaseReference fquidRef = dataBaseReference.child(Const.UsersPATH).child(userUid).
+                child(Const.FavoQUid).child(questionUid);
 
-        data = fquidRef.getKey();
+        fquidRef.toString()
+
+        // 対応するChildが存在しなければ、お気に入りではない
+        if(fquidRef == null)
+        {
+            isFavorite = false;
+        }
+        else
+        {
+            isFavorite = true;
+        }
 
         return isFavorite;
     }
@@ -229,20 +249,38 @@ public class QuestionDetailActivity extends AppCompatActivity {
 //    }
 
     /**
-     //     * お気に入り質問をFireBaseに保存
-     //     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
-     //     * @param qUid
-     //     */
-    private void saveFavoriteQuestionUid(String qUid) {
+     * お気に入り質問をFireBaseに保存/削除
+     * [参考] https://firebase.google.com/docs/reference/android/com/google/firebase/database/DatabaseReference.html#push()
+     * @param qUid
+     * @param isAdd true:追加、false:削除
+     */
+    private void updateFavoriteQuestionUid(String qUid, boolean isAdd) {
         // 現在ログイン中のUserに対応するChildの参照を取得
         String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference userRef = dataBaseReference.child(Const.UsersPATH).child(userUid);
 
-        Map<String, String> data = new HashMap<String, String>();
-        data.put(Const.FavoQUid, qUid);
 
-        userRef.push().setValue(data, this);
+        if(isAdd == true) {
+            // 追加
+            DatabaseReference userRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid).child(qUid);
+
+            // 適当な値を入れる (KeyのqUidの情報が残ればよい)
+            userRef.setValue("");
+
+            // [forDEBUG]
+            //Map<String, String> data = new HashMap<String, String>();
+            //Map<String, String> data;
+            //String key = userRef.getKey();  //Debug用
+            //FirebaseDatabase fdb = userRef.getDatabase();  //Debug用
+            //String key2 = userRef.getKey();  //Debug用
+        }
+        else
+        {
+            // 削除
+            DatabaseReference userRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid).child(qUid);
+            userRef.removeValue();
+        }
+
         //mProgress.show();
     }
 
