@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
                 mListView.setAdapter(mAdapter);
 
                 // 選択したジャンルにリスナーを登録する
+                // ドロワーでジャンルが選択された時に、Firebaseに対してそのジャンルの質問のデータの変化を受け取るように先ほど作成したChildEventListenerを設定します。
                 if (mGenreRef != null) {
                     mGenreRef.removeEventListener(mEventListener);
                 }

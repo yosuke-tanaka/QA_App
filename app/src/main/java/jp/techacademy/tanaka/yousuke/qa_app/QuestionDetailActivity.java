@@ -33,6 +33,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
     private QuestionDetailListAdapter mAdapter;
 
     private DatabaseReference mAnswerRef;
+    private DatabaseReference mFavoriteRef;
 
     // plusボタン
     private FloatingActionButton mFab;
@@ -43,6 +44,9 @@ public class QuestionDetailActivity extends AppCompatActivity {
     // お気に入りボタンの押下状態
     private boolean m_isFaboriteOn = false;
 
+    /**
+     * 回答用のChildEventListener
+     */
     private ChildEventListener mEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -86,6 +90,45 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
         }
     };
+
+    /**
+     * お気に入り情報用のChildEventListener
+     * (お気に入り情報がない場合は呼ばれない)
+     */
+    private ChildEventListener mEventListenerforFavorite = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            dataSnapshot.getKey();
+            HashMap map = (HashMap) dataSnapshot.getValue();
+
+            // お気に入り質問を探す
+            if(map.get(mOUID) != null)
+            {
+                SetFavoriteButton(true, false);
+            }
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
 
     @Override
     /**
@@ -137,7 +180,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mFab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SetFavoriteButton(m_isFaboriteOn);
+                ChangeFavoriteButton(m_isFaboriteOn);
             }
         });
 
@@ -148,72 +191,114 @@ public class QuestionDetailActivity extends AppCompatActivity {
             mFab2.hide();
         }
 
-        // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
-        mOUID = mQuestion.getQuestionUid();
-        m_isFaboriteOn = getIsFavorite(mOUID);
-        SetFavoriteButton(m_isFaboriteOn);
-
+        // Database関連
         DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+
+        // 回答用
         mAnswerRef = dataBaseReference.child(Const.ContentsPATH).child(String.valueOf(mQuestion.getGenre())).child(mQuestion.getQuestionUid()).child(Const.AnswersPATH);
         mAnswerRef.addChildEventListener(mEventListener);
+
+        // Questionのお気に入り状態に応じて、画面のお気に入りボタンの状態を設定
+        // 現在のアカウントのChild以下の現在の質問UIDを参照
+        // 参照が有る場合はmEventListenerforFavoriteが呼ばれm_isFaboriteOn = trueになる
+        // 参照が無い場合はfalseのまま
+        SetFavoriteButton(false, false);
+        mOUID = mQuestion.getQuestionUid();
+        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        //mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid).child(mOUID);
+        mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid);
+
+        mFavoriteRef.addChildEventListener(mEventListenerforFavorite);
+
     }
 
     /**
      * お気に入り状態の切り替え
-     * @param isFaboriteOn
+     * @param isFaboriteOn ONするか/OFFするか
+     * @param isUpdateDB DB更新有無
      */
-    private void SetFavoriteButton(boolean isFaboriteOn)
+    private void SetFavoriteButton(boolean isFaboriteOn, boolean isUpdateDB)
     {
-        if(isFaboriteOn == true){
+        if(isFaboriteOn == false){
             // お気に入り解除
             m_isFaboriteOn = false;
-            int color = Color.rgb(240,200,100);
+
+            // ボタンを灰色に変更
+            int color = Color.rgb(200,200,200);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
 
             // 解除
-            updateFavoriteQuestionUid(mOUID, false);
+            if(isUpdateDB == true) {
+                updateFavoriteQuestionUid(mOUID, false);
+            }
         }
         else
         {
             // お気に入り化
             m_isFaboriteOn = true;
-            int color = Color.rgb(200,200,200);
+
+            // ボタンを黄色変更
+            int color = Color.rgb(240,200,100);
             mFab2.setBackgroundTintList(ColorStateList.valueOf(color));
 
             // 登録
-            updateFavoriteQuestionUid(mOUID, true);
+            if(isUpdateDB == true) {
+                updateFavoriteQuestionUid(mOUID, true);
+            }
         }
     }
 
     /**
-     * お気に入り質問かどうかの情報をFireBaseから取得
-     * @param questionUid
-     * @return
+     * お気に入りのON/OFF状態を反転
+     * @param isFaboriteCurrentOn 現在のON/OFF
      */
-    private boolean getIsFavorite(String questionUid)
+    private void ChangeFavoriteButton(boolean isFaboriteCurrentOn)
     {
-        boolean isFavorite;
+        boolean isOn;
 
-        // 現在ログイン中のUserに対応するChildの参照を取得
-        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference fquidRef = dataBaseReference.child(Const.UsersPATH).child(userUid).
-                child(Const.FavoQUid).child(questionUid);
-
-        fquidRef.toString()
-
-        // 対応するChildが存在しなければ、お気に入りではない
-        if(fquidRef == null)
-        {
-            isFavorite = false;
+        if(isFaboriteCurrentOn == true) {
+            isOn = false;
         }
         else
         {
-            isFavorite = true;
+            isOn = true;
         }
 
-        return isFavorite;
+        SetFavoriteButton(isOn, true);
     }
+
+
+
+// 2016.09.27 [削除] mEventListenerforFavoriteで実現する
+//    /**
+//     * お気に入り質問かどうかの情報をFireBaseから取得
+//     * @param questionUid
+//     * @return
+//     */
+//    private boolean getIsFavorite(String questionUid)
+//    {
+//        boolean isFavorite;
+//
+//        // 現在ログイン中のUserに対応するChildの参照を取得
+//        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//        DatabaseReference dataBaseReference = FirebaseDatabase.getInstance().getReference();
+//        DatabaseReference fquidRef = dataBaseReference.child(Const.UsersPATH).child(userUid).
+//                child(Const.FavoQUid).child(questionUid);
+//
+//        fquidRef.
+//
+//        // 対応するChildが存在しなければ、お気に入りではない
+//        if(fquidRef == null)
+//        {
+//            isFavorite = false;
+//        }
+//        else
+//        {
+//            isFavorite = true;
+//        }
+//
+//        return isFavorite;
+//    }
 
 //    /**
 //     * お気に入り質問かどうかの情報をPreferenceから取得
