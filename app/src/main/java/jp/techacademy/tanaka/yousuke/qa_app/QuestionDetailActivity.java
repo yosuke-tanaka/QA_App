@@ -93,16 +93,17 @@ public class QuestionDetailActivity extends AppCompatActivity {
 
     /**
      * お気に入り情報用のChildEventListener
-     * (お気に入り情報がない場合は呼ばれない)
+     * [注意]
+     * ・お気に入りQUIDの数分呼ばれる
+     * ・お気に入り情報がない場合は呼ばれない
      */
     private ChildEventListener mEventListenerforFavorite = new ChildEventListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            dataSnapshot.getKey();
-            HashMap map = (HashMap) dataSnapshot.getValue();
+            String key = (String)dataSnapshot.getKey();
 
-            // お気に入り質問を探す
-            if(map.get(mOUID) != null)
+            // お気に入り質問かを確認
+            if(key.equals(mOUID) == true)
             {
                 SetFavoriteButton(true, false);
             }
@@ -180,6 +181,11 @@ public class QuestionDetailActivity extends AppCompatActivity {
         mFab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // DB参照は初回のみでよいのでremoveする
+                if (mFavoriteRef != null) {
+                    mFavoriteRef.removeEventListener(mEventListenerforFavorite);
+                }
+
                 ChangeFavoriteButton(m_isFaboriteOn);
             }
         });
@@ -300,38 +306,7 @@ public class QuestionDetailActivity extends AppCompatActivity {
 //        return isFavorite;
 //    }
 
-//    /**
-//     * お気に入り質問かどうかの情報をPreferenceから取得
-//     * @param questionUid
-//     * @return
-//     */
-//    private boolean getIsFavorite(String questionUid)
-//    {
-//        boolean isFavorite;
-//        String qUid;
-//        Object obj;
-//
-//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-//
-//        // 読み込んでSetの末尾に追加
-//        Set<String> uidSet = new HashSet<>();
-//        sp.getStringSet(Const.FavoQUid, uidSet);
-//        Iterator iterator = uidSet.iterator();
-//        obj = iterator.next();
-//
-//        isFavorite =false;
-//        while(obj != null){
-//            qUid = (String)obj;
-//            if(qUid == questionUid)
-//            {
-//                // お気に入り質問である
-//                isFavorite = true;
-//                break;
-//            }
-//        }
-//
-//        return isFavorite;
-//    }
+
 
     /**
      * お気に入り質問をFireBaseに保存/削除
@@ -367,24 +342,45 @@ public class QuestionDetailActivity extends AppCompatActivity {
         }
 
         //mProgress.show();
+
+        // お気に入り質問をPrefernceに1件追加/1件削除
+        updateFavoriteQuestionUid_SP(qUid, isAdd);
     }
 
-//    /**
-//     * お気に入り質問をPrefernceに保存
-//     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
-//     * @param uid
-//     */
-//    private void saveFavoriteQuestionUid(String uid) {
-//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+    /**
+     * お気に入り質問をPrefernceに1件追加/1件削除
+     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
+     * @param qUid_in
+     * @param isAdd 追加/削除
+     */
+    private void updateFavoriteQuestionUid_SP(String qUid_in, boolean isAdd) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 読み込んでSetの末尾に追加
+        Set<String> uidSet = new HashSet<>();
+        sp.getStringSet(Const.FavoQUid, uidSet);
+
+        if(isAdd == true) {
+            // 1件追加
+            uidSet.add(qUid_in);
+        }
+        else
+        {
+            // 1件削除
+            uidSet.remove(qUid_in);
+
+//            for (Object uid : uidSet) {
+//                if(uid.equals(uid_in) == true)
+//                {
 //
-//        // 読み込んでSetの末尾に追加
-//        Set<String> uidSet = new HashSet<>();
-//        sp.getStringSet(Const.FavoQUid, uidSet);
-//        uidSet.add(uid);
-//        // 保存
-//        SharedPreferences.Editor editor = sp.edit();
-//        editor.putStringSet(Const.FavoQUid, uidSet);
-//        editor.commit();
-//    }
+//                }
+//            }
+        }
+
+        // 保存
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putStringSet(Const.FavoQUid, uidSet);
+        editor.commit();
+    }
 
 }

@@ -24,7 +24,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -142,6 +144,7 @@ public class LoginActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot snapshot) {
                                 Map data = (Map) snapshot.getValue();
                                 saveName((String)data.get("name"));
+                                saveFavoriteQuestionUid((HashMap)data.get(Const.FavoQUid));
                             }
                             @Override
                             public void onCancelled(DatabaseError firebaseError) {
@@ -275,6 +278,26 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(Const.NameKEY, name);
+        editor.commit();
+    }
+
+    /**
+     * お気に入り情報をPreferenceに保存
+     * @param fqUids お気に入りQUID一覧
+     */
+    private void saveFavoriteQuestionUid(HashMap fqUids) {
+        // Preferenceに保存する
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 読み込んでSetの末尾に追加
+        Set<String> uidSet = new HashSet<>();
+        for (Object key : fqUids.keySet()) {
+            uidSet.add((String)key);
+        }
+
+        // 保存
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putStringSet(Const.FavoQUid, uidSet);
         editor.commit();
     }
 }

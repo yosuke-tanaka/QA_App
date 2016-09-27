@@ -200,6 +200,12 @@ public class MainActivity extends AppCompatActivity {
                 if (id == R.id.nav_favorite) {
                     mToolbar.setTitle("★お気に入り");
                     mGenre = 999;
+
+                    // お気に入り画面を表示する
+                    Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
+                    startActivity(intent);
+
+                    return true;
                 } else if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
                     mGenre = 1;
