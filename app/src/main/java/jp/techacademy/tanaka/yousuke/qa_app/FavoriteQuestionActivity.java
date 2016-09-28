@@ -134,6 +134,9 @@ public class FavoriteQuestionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_question);
 
+        // UIの準備
+        setTitle("★お気に入り質問");
+
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
 

@@ -1,9 +1,11 @@
 package jp.techacademy.tanaka.yousuke.qa_app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -26,9 +28,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *修正する内容は以下の通りです。
@@ -50,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private ListView mListView;
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
+
+    private DatabaseReference mFavoRef;
 
     /**
      * データに追加・変化があった時に受け取るChildEventListenerを作成
@@ -261,6 +269,25 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // 2016.09.28 [修正] FireBaseからお気に入りQUID情報を取得しSharedPrefernceに保存
+        //(端末が変わった場合、SharedPrefernceにQUID情報情報がないので)
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) {
+            DatabaseReference userRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid());
+            mFavoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    Map data = (Map) snapshot.getValue();
+                    saveFavoriteQuestionUid((HashMap) data.get(Const.FavoQUid));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {
+                }
+            });
+        }
+
     }
 
     @Override
@@ -281,5 +308,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    /**
+     * お気に入り情報をPreferenceに保存
+     * @param fqUids お気に入りQUID一覧
+     */
+    private void saveFavoriteQuestionUid(HashMap fqUids) {
+        // Preferenceに保存する
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 読み込んでSetの末尾に追加
+        Set<String> uidSet = new HashSet<>();
+        for (Object key : fqUids.keySet()) {
+            uidSet.add((String)key);
+        }
+
+        // 保存
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putStringSet(Const.FavoQUid, uidSet);
+        editor.commit();
     }
 }
