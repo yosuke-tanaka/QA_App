@@ -194,7 +194,8 @@ public class FavoriteQuestionActivity extends AppCompatActivity {
 
         // 読み込んでSetの末尾に追加
         Set<String> uidSet = new HashSet<>();
-        sp.getStringSet(Const.FavoQUid, uidSet);
+        // 第２引数はkeyが存在しない時に返す初期値
+        uidSet = sp.getStringSet(Const.FavoQUid, uidSet);
 
         isFavorite = uidSet.contains(questionUid);
 

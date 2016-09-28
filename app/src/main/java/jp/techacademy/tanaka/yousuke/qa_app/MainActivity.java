@@ -1,5 +1,6 @@
 package jp.techacademy.tanaka.yousuke.qa_app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -18,7 +19,9 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Question> mQuestionArrayList;
     private QuestionsListAdapter mAdapter;
 
-    private DatabaseReference mFavoRef;
+    //private DatabaseReference mFavoRef;
+
+    private Button mFavoButton;
 
     /**
      * データに追加・変化があった時に受け取るChildEventListenerを作成
@@ -204,17 +209,17 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
-                // 2016.09.20 [修正] お気に入り追加
-                if (id == R.id.nav_favorite) {
-                    mToolbar.setTitle("★お気に入り");
-                    mGenre = 999;
+//                if (id == R.id.nav_favorite) {
+//                    //mToolbar.setTitle("★お気に入り");
+//
+//                    // お気に入り画面を表示する
+//                    Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
+//                    startActivity(intent);
+//
+//                    return true;
+//                }
 
-                    // お気に入り画面を表示する
-                    Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
-                    startActivity(intent);
-
-                    return true;
-                } else if (id == R.id.nav_hobby) {
+                if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
                     mGenre = 1;
                 } else if (id == R.id.nav_life) {
@@ -274,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
         //(端末が変わった場合、SharedPrefernceにQUID情報情報がないので)
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null) {
-            DatabaseReference userRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid());
+            DatabaseReference mFavoRef = mDatabaseReference.child(Const.UsersPATH).child(user.getUid());
             mFavoRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
@@ -288,6 +293,36 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // お気に入り画面に移動ボタン
+        mFavoButton = (Button) findViewById(R.id.button_favoList);
+        mFavoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // お気に入り画面を表示する
+                Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    @Override
+    /**
+     * ドロワー内のお気に入りボタンの表示切替
+     * [注意] 設定画面でログアウトされた後にも更新したいのでonResume内で行う
+     */
+    protected void onResume(){
+        super.onResume();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        // ログイン時のみ表示
+        if(user == null) {
+            mFavoButton.setVisibility(View.INVISIBLE);
+        }
+        else
+        {
+            mFavoButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

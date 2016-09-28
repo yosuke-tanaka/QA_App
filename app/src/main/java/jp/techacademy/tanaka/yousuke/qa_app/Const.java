@@ -9,5 +9,4 @@ public class Const {
 
     // 2016.09.20 [修正] お気に入り追加
     public static final String FavoQUid = "fquid"; // お気に入り質問のUIDを保存する時のキー
-    public static final int IdFavorite =  999;   // お気に入りに対応するジャンル番号
 }

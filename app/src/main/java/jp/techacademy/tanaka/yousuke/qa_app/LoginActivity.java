@@ -300,4 +300,6 @@ public class LoginActivity extends AppCompatActivity {
         editor.putStringSet(Const.FavoQUid, uidSet);
         editor.commit();
     }
+
+
 }

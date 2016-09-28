@@ -101,8 +101,20 @@ public class SettingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
                 mNameText.setText("");
+                // お気に入り情報をPreferenceから削除
+                delFavoriteQuestionUid();
                 Snackbar.make(v, "ログアウトしました", Snackbar.LENGTH_LONG).show();
             }
         });
+    }
+
+    /**
+     * お気に入り情報をPreferenceから削除
+     */
+    private void delFavoriteQuestionUid() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.remove(Const.FavoQUid);
+        editor.commit();
     }
 }
