@@ -22,7 +22,9 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -294,7 +296,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // お気に入り画面に移動ボタン
-        mFavoButton = (Button) findViewById(R.id.button_favoList);
+        View header=navigationView.getHeaderView(0);
+        mFavoButton = (Button) header.findViewById(R.id.buttonFavoList);
+        mFavoButton.setText("----");
+
         mFavoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -306,24 +311,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    /**
-     * ドロワー内のお気に入りボタンの表示切替
-     * [注意] 設定画面でログアウトされた後にも更新したいのでonResume内で行う
-     */
-    protected void onResume(){
-        super.onResume();
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        // ログイン時のみ表示
-        if(user == null) {
-            mFavoButton.setVisibility(View.INVISIBLE);
-        }
-        else
-        {
-            mFavoButton.setVisibility(View.VISIBLE);
-        }
-    }
+//    @Override
+//    /**
+//     * ドロワー内のお気に入りボタンの表示切替
+//     * [注意] 設定画面でログアウトされた後にも更新したいのでonResume内で行う
+//     */
+//    protected void onResume(){
+//        super.onResume();
+//
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        // ログイン時のみ表示
+//        if(user == null) {
+//            mFavoButton.setVisibility(View.INVISIBLE);
+//        }
+//        else
+//        {
+//            mFavoButton.setVisibility(View.VISIBLE);
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

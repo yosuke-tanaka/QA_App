@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    android:id="@+id/layoutNavHeader"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:gravity="bottom"
@@ -17,7 +19,7 @@
         android:textColor="@color/colorButtonText"/>
 
     <Button
-        android:id="@+id/button_favoList"
+        android:id="@+id/buttonFavoList"
         android:layout_width="40sp"
         android:layout_height="40sp"
         android:text="★"
