@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
                     Map data = (Map) snapshot.getValue();
-                    saveFavoriteQuestionUid((HashMap) data.get(Const.FavoQUid));
+                    Global.saveFavoriteQuestionUid((HashMap) data.get(Const.FavoQUid));
                 }
 
                 @Override
@@ -368,23 +368,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * お気に入り情報をPreferenceに保存
-     * @param fqUids お気に入りQUID一覧
-     */
-    private void saveFavoriteQuestionUid(HashMap fqUids) {
-        // Preferenceに保存する
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//    /**
+//     * お気に入り情報をPreferenceに保存
+//     * @param fqUids お気に入りQUID一覧
+//     */
+//    private void saveFavoriteQuestionUid(HashMap fqUids) {
+//        // Preferenceに保存する
+//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//
+//        // 読み込んでSetの末尾に追加
+//        Set<String> uidSet = new HashSet<>();
+//        for (Object key : fqUids.keySet()) {
+//            uidSet.add((String)key);
+//        }
+//
+//        // 保存
+//        SharedPreferences.Editor editor = sp.edit();
+//        editor.putStringSet(Const.FavoQUid, uidSet);
+//        editor.commit();
+//    }
 
-        // 読み込んでSetの末尾に追加
-        Set<String> uidSet = new HashSet<>();
-        for (Object key : fqUids.keySet()) {
-            uidSet.add((String)key);
-        }
-
-        // 保存
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putStringSet(Const.FavoQUid, uidSet);
-        editor.commit();
-    }
 }

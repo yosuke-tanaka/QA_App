@@ -69,7 +69,7 @@ public class FavoriteQuestionActivity extends AppCompatActivity {
 
             // Prefernceに登録されているお気に入りQUID情報を利用して、お気に入り質問のみを表示するようにする
             String questionUid = dataSnapshot.getKey();
-            boolean isFavorite = getIsFavorite(questionUid);
+            boolean isFavorite = Global.getIsFavorite(questionUid);
             if(isFavorite == false)
             {
                return;
@@ -179,41 +179,41 @@ public class FavoriteQuestionActivity extends AppCompatActivity {
     }
 
 
-    /**
-      * お気に入り質問かどうかの情報をPreferenceから取得
-      * @param questionUid
-      * @return
-      */
-    private boolean getIsFavorite(String questionUid)
-    {
-        boolean isFavorite;
-        String qUid;
-        Object obj;
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // 読み込んでSetの末尾に追加
-        Set<String> uidSet = new HashSet<>();
-        // 第２引数はkeyが存在しない時に返す初期値
-        uidSet = sp.getStringSet(Const.FavoQUid, uidSet);
-
-        isFavorite = uidSet.contains(questionUid);
-
-//        Iterator iterator = uidSet.iterator();
-//        obj = iterator.next();
+//    /**
+//      * お気に入り質問かどうかの情報をPreferenceから取得
+//      * @param questionUid
+//      * @return
+//      */
+//    private boolean getIsFavorite(String questionUid)
+//    {
+//        boolean isFavorite;
+//        String qUid;
+//        Object obj;
 //
-//        isFavorite =false;
-//        while(obj != null){
-//            qUid = (String)obj;
-//            if(qUid == questionUid)
-//            {
-//                // お気に入り質問である
-//                isFavorite = true;
-//                break;
-//            }
-//        }
-
-        return isFavorite;
-    }
+//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+//
+//        // 読み込んでSetの末尾に追加
+//        Set<String> uidSet = new HashSet<>();
+//        // 第２引数はkeyが存在しない時に返す初期値
+//        uidSet = sp.getStringSet(Const.FavoQUid, uidSet);
+//
+//        isFavorite = uidSet.contains(questionUid);
+//
+////        Iterator iterator = uidSet.iterator();
+////        obj = iterator.next();
+////
+////        isFavorite =false;
+////        while(obj != null){
+////            qUid = (String)obj;
+////            if(qUid == questionUid)
+////            {
+////                // お気に入り質問である
+////                isFavorite = true;
+////                break;
+////            }
+////        }
+//
+//        return isFavorite;
+//    }
 
 }

@@ -344,43 +344,36 @@ public class QuestionDetailActivity extends AppCompatActivity {
         //mProgress.show();
 
         // お気に入り質問をPrefernceに1件追加/1件削除
-        updateFavoriteQuestionUid_SP(qUid, isAdd);
+        Global.updateFavoriteQuestionUid(qUid, isAdd);
     }
 
-    /**
-     * お気に入り質問をPrefernceに1件追加/1件削除
-     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
-     * @param qUid_in
-     * @param isAdd 追加/削除
-     */
-    private void updateFavoriteQuestionUid_SP(String qUid_in, boolean isAdd) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // 読み込んでSetの末尾に追加
-        Set<String> uidSet = new HashSet<>();
-        sp.getStringSet(Const.FavoQUid, uidSet);
-
-        if(isAdd == true) {
-            // 1件追加
-            uidSet.add(qUid_in);
-        }
-        else
-        {
-            // 1件削除
-            uidSet.remove(qUid_in);
-
-//            for (Object uid : uidSet) {
-//                if(uid.equals(uid_in) == true)
-//                {
+//    /**
+//     * お気に入り質問をPrefernceに1件追加/1件削除
+//     * [参考] http://qiita.com/piruty_joy/items/21aa5557ec380e93599e
+//     * @param qUid_in
+//     * @param isAdd 追加/削除
+//     */
+//    private void updateFavoriteQuestionUid_SP(String qUid_in, boolean isAdd) {
+//        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 //
-//                }
-//            }
-        }
-
-        // 保存
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putStringSet(Const.FavoQUid, uidSet);
-        editor.commit();
-    }
+//        // 読み込んでSetの末尾に追加
+//        Set<String> uidSet = new HashSet<>();
+//        sp.getStringSet(Const.FavoQUid, uidSet);
+//
+//        if(isAdd == true) {
+//            // 1件追加
+//            uidSet.add(qUid_in);
+//        }
+//        else
+//        {
+//            // 1件削除
+//            uidSet.remove(qUid_in);
+//        }
+//
+//        // 保存
+//        SharedPreferences.Editor editor = sp.edit();
+//        editor.putStringSet(Const.FavoQUid, uidSet);
+//        editor.commit();
+//    }
 
 }
