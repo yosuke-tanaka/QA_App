@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     //private DatabaseReference mFavoRef;
 
     private Button mFavoButton;
+    private View mNaviHeader;
 
     /**
      * データに追加・変化があった時に受け取るChildEventListenerを作成
@@ -211,15 +212,25 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
 
-//                if (id == R.id.nav_favorite) {
-//                    //mToolbar.setTitle("★お気に入り");
-//
-//                    // お気に入り画面を表示する
-//                    Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
-//                    startActivity(intent);
-//
-//                    return true;
-//                }
+                if (id == R.id.nav_favorite) {
+                    // ログイン済みのユーザーを取得する
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                    if (user == null) {
+                        // ログインしていなければログイン画面に遷移させる
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
+                    } else {
+                        // お気に入り画面を表示する
+                        Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
+                        startActivity(intent);
+                    }
+
+                    DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                    drawer.closeDrawer(GravityCompat.START);
+
+                    return true;
+                }
 
                 if (id == R.id.nav_hobby) {
                     mToolbar.setTitle("趣味");
@@ -296,18 +307,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // お気に入り画面に移動ボタン
-        View header=navigationView.getHeaderView(0);
-        mFavoButton = (Button) header.findViewById(R.id.buttonFavoList);
-        mFavoButton.setText("----");
+        // [memo]hCnt = 1になる
+        //int hCnt  = navigationView.getHeaderCount();  // メニュー内容の個数
+        //mNaviHeader = navigationView.getHeaderView(hCnt - 1);
 
-        mFavoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // お気に入り画面を表示する
-                Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
-                startActivity(intent);
-            }
-        });
+        // [memo]mFavoButton = nullになる
+        //mNaviHeader = navigationView.getHeaderView(0);
+        //mFavoButton = (Button) mNaviHeader.findViewById(R.id.buttonFavoList);
+
+//        mFavoButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // お気に入り画面を表示する
+//                Intent intent = new Intent(getApplicationContext(), FavoriteQuestionActivity.class);
+//                startActivity(intent);
+//            }
+//        });
 
     }
 
@@ -323,10 +338,12 @@ public class MainActivity extends AppCompatActivity {
 //        // ログイン時のみ表示
 //        if(user == null) {
 //            mFavoButton.setVisibility(View.INVISIBLE);
+//            //mNaviHeader.setVisibility(View.GONE);
 //        }
 //        else
 //        {
 //            mFavoButton.setVisibility(View.VISIBLE);
+//            //mNaviHeader.setVisibility(View.VISIBLE);
 //        }
 //    }
 
