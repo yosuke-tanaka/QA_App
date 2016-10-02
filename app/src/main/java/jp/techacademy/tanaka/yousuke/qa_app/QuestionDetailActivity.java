@@ -210,12 +210,14 @@ public class QuestionDetailActivity extends AppCompatActivity {
         // 参照が無い場合はfalseのまま
         SetFavoriteButton(false, false);
         mOUID = mQuestion.getQuestionUid();
-        String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        //mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid).child(mOUID);
-        mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid);
+        // 2016.10.02 [修正] ログインしていない場合はお気に入り状態確認不要
+        if(user != null) {
+            String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            //mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid).child(mOUID);
+            mFavoriteRef = dataBaseReference.child(Const.UsersPATH).child(userUid).child(Const.FavoQUid);
 
-        mFavoriteRef.addChildEventListener(mEventListenerforFavorite);
-
+            mFavoriteRef.addChildEventListener(mEventListenerforFavorite);
+        }
     }
 
     /**
