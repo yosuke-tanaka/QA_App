@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private Button mFavoButton;
     private View mNaviHeader;
 
+    NavigationView mNavigationView;
+
     /**
      * データに追加・変化があった時に受け取るChildEventListenerを作成
      */
@@ -206,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 int id = item.getItemId();
@@ -307,6 +309,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // お気に入り画面に移動ボタン
+        //mFavoButton = (Button) navigationView.getHeaderView(0).findViewById(R.id.buttonFavoList);
+        //mFavoButton.setText("test");
+
         // [memo]hCnt = 1になる
         //int hCnt  = navigationView.getHeaderCount();  // メニュー内容の個数
         //mNaviHeader = navigationView.getHeaderView(hCnt - 1);
@@ -326,26 +331,35 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    @Override
-//    /**
-//     * ドロワー内のお気に入りボタンの表示切替
-//     * [注意] 設定画面でログアウトされた後にも更新したいのでonResume内で行う
-//     */
-//    protected void onResume(){
-//        super.onResume();
-//
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        // ログイン時のみ表示
-//        if(user == null) {
-//            mFavoButton.setVisibility(View.INVISIBLE);
-//            //mNaviHeader.setVisibility(View.GONE);
-//        }
-//        else
-//        {
-//            mFavoButton.setVisibility(View.VISIBLE);
-//            //mNaviHeader.setVisibility(View.VISIBLE);
-//        }
-//    }
+    @Override
+    /**
+     * ドロワー内のお気に入りボタンの表示切替
+     * [注意] 設定画面でログアウトされた後にも更新したいのでonResume内で行う
+     */
+    protected void onResume(){
+        super.onResume();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // 2016.10.04 [修正] お気に入りへ移動項目の表示切替
+        MenuItem item = mNavigationView.getMenu().getItem(0);
+
+
+        // ログイン時のみ表示
+        if(user == null) {
+            //mFavoButton.setVisibility(View.INVISIBLE);
+            //mNaviHeader.setVisibility(View.GONE);
+
+            item.setVisible(false);
+        }
+        else
+        {
+            //mFavoButton.setVisibility(View.VISIBLE);
+            //mNaviHeader.setVisibility(View.VISIBLE);
+
+            item.setVisible(true);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
